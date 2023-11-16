@@ -14,6 +14,7 @@
 #include "sphere.h"
 #include "light.h"
 #include "camera.h"
+#include "cube.h"
 
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 600;
@@ -102,7 +103,7 @@ Color castRay(const glm::vec3& rayOrigin, const glm::vec3& rayDirection, const s
 
 void setUp() {
     Material rubber = {
-        Color(80, 0, 0),   // diffuse
+        Color(90, 10, 20, 90),   // diffuse
         0.9,
         0.1,
         10.0f,
@@ -112,9 +113,9 @@ void setUp() {
 
     Material ivory = {
         Color(100, 100, 80),
-        0.5,
-        0.5,
-        50.0f,
+        0.9,
+        0.1,
+        10.0f,
         0.4f,
         0.0f
     };
@@ -136,10 +137,11 @@ void setUp() {
         0.2f,
         1.0f,
     };
-    objects.push_back(new Sphere(glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, rubber));
-    objects.push_back(new Sphere(glm::vec3(-1.0f, 0.0f, -4.0f), 1.0f, ivory));
-    objects.push_back(new Sphere(glm::vec3(1.0f, 0.0f, -4.0f), 1.0f, mirror));
-    objects.push_back(new Sphere(glm::vec3(0.0f, 1.0f, -3.0f), 1.0f, glass));
+    objects.push_back(new Cube(glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, rubber));
+    objects.push_back(new Cube(glm::vec3(-1.0f, 0.0f, -4.0f), 1.0f, ivory));
+    objects.push_back(new Cube(glm::vec3(1.0f, 0.0f, -4.0f), 1.0f, mirror));
+    objects.push_back(new Cube(glm::vec3(0.0f, 1.0f, -3.0f), 1.0f, glass));
+    objects.push_back(new Cube(glm::vec3(0.0f, -1.0f, -3.0f), 1.0f, glass));
 }
 
 void render() {
