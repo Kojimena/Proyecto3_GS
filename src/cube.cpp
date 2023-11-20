@@ -24,31 +24,34 @@ Intersect Cube::rayIntersect(const glm::vec3& rayOrigin, const glm::vec3& rayDir
         }
     }
 
-    // Calcula la normal basada en la dirección desde el centro del cubo al punto de intersección
     glm::vec3 delta = rayOrigin + tMin * rayDirection - center;
-    float maxComponent = glm::max(glm::abs(delta.x), glm::max(glm::abs(delta.y), glm::abs(delta.z)));
-    normal = glm::normalize(delta / maxComponent);
+    glm::vec3 absDelta = glm::abs(delta);
 
-    // Calcula las coordenadas de textura para cualquier cubo en el espacio
-    float tx, ty;
-
-// Proyecta las coordenadas del punto de intersección en cada cara del cubo sobre un plano 2D
-    glm::vec3 hitPoint = rayOrigin + tMin * rayDirection;
-    glm::vec3 localHitPoint = hitPoint - center; // Punto de intersección en coordenadas locales
-
-// Normaliza el punto de intersección local a un rango de [0, 1]
-    if (std::abs(normal.x) > 0) {
-        tx = (localHitPoint.z / edgeLength + 0.5f);
-        ty = (localHitPoint.y / edgeLength + 0.5f);
-    } else if (std::abs(normal.y) > 0) {
-        tx = (localHitPoint.x / edgeLength + 0.5f);
-        ty = (localHitPoint.z / edgeLength + 0.5f);
-    } else { // normal.z != 0
-        tx = (localHitPoint.x / edgeLength + 0.5f);
-        ty = (localHitPoint.y / edgeLength + 0.5f);
+    // Determine which face was hit
+    if (absDelta.x > absDelta.y && absDelta.x > absDelta.z) {
+        normal = glm::vec3(delta.x > 0 ? 1 : -1, 0, 0);
+    } else if (absDelta.y > absDelta.z) {
+        normal = glm::vec3(0, delta.y > 0 ? 1 : -1, 0);
+    } else {
+        normal = glm::vec3(0, 0, delta.z > 0 ? 1 : -1);
     }
 
-// Asegúrate de que las coordenadas UV estén en el rango [0, 1]
+    // Calculate UV coordinates for the hit face
+    float tx, ty;
+    if (absDelta.x > absDelta.y && absDelta.x > absDelta.z) {
+        normal = glm::vec3(delta.x > 0 ? 1 : -1, 0, 0);
+        tx = (delta.y + edgeLength / 2) / edgeLength;
+        ty = (delta.z + edgeLength / 2) / edgeLength;
+    } else if (absDelta.y > absDelta.z) {
+        normal = glm::vec3(0, delta.y > 0 ? 1 : -1, 0);
+        tx = (delta.x + edgeLength / 2) / edgeLength;
+        ty = (delta.z + edgeLength / 2) / edgeLength;
+    } else {
+        normal = glm::vec3(0, 0, delta.z > 0 ? 1 : -1);
+        tx = (delta.x + edgeLength / 2) / edgeLength;
+        ty = (delta.y + edgeLength / 2) / edgeLength;
+    }
+
     tx = glm::clamp(tx, 0.0f, 1.0f);
     ty = glm::clamp(ty, 0.0f, 1.0f);
 

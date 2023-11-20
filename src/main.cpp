@@ -26,7 +26,7 @@ const float ASPECT_RATIO = static_cast<float>(SCREEN_WIDTH) / static_cast<float>
 const int MAX_RECURSION = 3;
 const float BIAS = 0.0001f;
 glm::vec3 lightOffset(0.0f, 2.0f, -1.0f);  // Ejemplo de desplazamiento
-Skybox skybox("../assets/sky.png");
+Skybox skybox("../assets/ocean.png");
 
 SDL_Renderer* renderer;
 std::vector<Object*> objects;
@@ -142,14 +142,16 @@ SDL_Surface* loadTexture(const std::string& file) {
 
 void setUp() {
 
-    SDL_Surface* textureSurface = loadTexture("../assets/tree.png");
-    SDL_Surface* textureWood = loadTexture("../assets/pink.png");
+    SDL_Surface* textureSurface = loadTexture("../assets/face.png");
 
-    SDL_Surface* pinkleaves = loadTexture("../assets/pink.png");
+    SDL_Surface* skinFace = loadTexture("../assets/skin.png");
+    SDL_Surface* chestFace = loadTexture("../assets/collar.png");
 
-    Material treeMaterial = {
-        Color(155, 0, 0),
-        0.9,
+    SDL_Surface* dress = loadTexture("../assets/dress.png");
+
+    Material faceMaterial = {
+        Color(0, 0, 0),
+        0.7,
         0.3,
         10.0f,
         0.0f,
@@ -158,7 +160,29 @@ void setUp() {
         textureSurface
     };
 
-    Material pinkleavesMaterial = {
+    Material bodyMaterial = {
+            Color(0, 0, 0),
+            0.7,
+            0.3,
+            10.0f,
+            0.0f,
+            0.0f,
+            0.0f,
+            skinFace
+    };
+
+    Material chestMaterial = {
+            Color(0, 0, 0),
+            0.7,
+            0.3,
+            10.0f,
+            0.0f,
+            0.0f,
+            0.0f,
+            chestFace
+    };
+
+    Material dressMaterial = {
         Color(155, 0, 0),
         0.9,
         0.3,
@@ -166,7 +190,8 @@ void setUp() {
         0.0f,
         0.0f,
         0.0f,
-        pinkleaves
+        dress
+
     };
 
     Material woodMaterial = {
@@ -176,8 +201,7 @@ void setUp() {
         10.0f,
         0.0f,
         0.0f,
-        0.0f,
-        textureWood
+        0.0f
     };
 
     Material rubber = {
@@ -186,15 +210,6 @@ void setUp() {
         0.1,
         10.0f,
         0.0f,
-        0.0f
-    };
-
-    Material ivory = {
-        Color(100, 100, 80),
-        0.9,
-        0.1,
-        10.0f,
-        0.4f,
         0.0f
     };
 
@@ -215,10 +230,18 @@ void setUp() {
         0.2f,
         1.0f,
     };
-    objects.push_back(new Cube(glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, treeMaterial));
-    //objects.push_back(new Cube(glm::vec3(-1.0f, 0.0f, 0.0f), 1.0f, treeMaterial));
-    //objects.push_back(new Cube(glm::vec3(1.0f, 0.0f, 0.0f), 1.0f, treeMaterial));
-    //objects.push_back(new Cube(glm::vec3(0.0f, 1.0f, 0.0f), 1.0f, treeMaterial));
+    objects.push_back(new Cube(glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, faceMaterial));
+    //shoulder
+    objects.push_back(new Cube(glm::vec3(-1.0f, -1.0f, 0.0f), 1.0f, bodyMaterial));
+    objects.push_back(new Cube(glm::vec3(1.0f, -1.0f, 0.0f), 1.0f, bodyMaterial));
+
+    //cuerpo
+    objects.push_back(new Cube(glm::vec3(0.0f, -1.0f, 0.0f), 1.0f, chestMaterial));
+    objects.push_back(new Cube(glm::vec3(0.0f, -2.0f, 0.0f), 1.0f, dressMaterial));
+    objects.push_back(new Cube(glm::vec3(0.0f, -3.0f, 0.0f), 1.0f, bodyMaterial));
+
+
+
 
     //objects.push_back(new Cube(glm::vec3(0.0f, -1.0f, 0.0f), 1.0f, woodMaterial));
     //objects.push_back(new Cube(glm::vec3(0.0f, 0.0f, -1.0f), 1.0f, woodMaterial));
