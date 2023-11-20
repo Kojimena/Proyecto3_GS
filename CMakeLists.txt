@@ -3,7 +3,7 @@ project(Proyecto3_GS)
 
 set(CMAKE_CXX_STANDARD 20)
 
-add_executable(Proyecto3_GS src/main.cpp src/camera.cpp src/sphere.cpp src/light.h src/material.h src/color.h src/camera.h src/intersect.h src/object.h src/print.h src/sphere.h src/cube.h src/cube.cpp)
+add_executable(Proyecto3_GS src/main.cpp src/camera.cpp src/sphere.cpp src/light.h src/material.h src/color.h src/camera.h src/intersect.h src/object.h src/print.h src/sphere.h src/cube.h src/cube.cpp src/skybox.cpp src/texture.h)
 
 # Enable C++20 features
 set(CMAKE_CXX_STANDARD 20)

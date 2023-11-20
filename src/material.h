@@ -1,6 +1,7 @@
 #pragma once
 
 #include "color.h"
+#include "texture.h"
 
 struct Material {
   Color diffuse;
@@ -10,4 +11,5 @@ struct Material {
   float reflectivity;
   float transparency;
   float refractionIndex;
+  SDL_Surface* texture;
 };

@@ -24,23 +24,34 @@ Intersect Cube::rayIntersect(const glm::vec3& rayOrigin, const glm::vec3& rayDir
         }
     }
 
-    float epsilon = 0.001f; // Un pequeño valor para evitar errores de precisión
+    // Calcula la normal basada en la dirección desde el centro del cubo al punto de intersección
+    glm::vec3 delta = rayOrigin + tMin * rayDirection - center;
+    float maxComponent = glm::max(glm::abs(delta.x), glm::max(glm::abs(delta.y), glm::abs(delta.z)));
+    normal = glm::normalize(delta / maxComponent);
 
-    // Calcula la normal basada en la intersección más cercana
-    if (std::abs(tMin - ((bounds[0].x - rayOrigin.x) / rayDirection.x)) < epsilon) {
-        normal = glm::vec3(-1, 0, 0);
-    } else if (std::abs(tMin - ((bounds[1].x - rayOrigin.x) / rayDirection.x)) < epsilon) {
-        normal = glm::vec3(1, 0, 0);
-    } else if (std::abs(tMin - ((bounds[0].y - rayOrigin.y) / rayDirection.y)) < epsilon) {
-        normal = glm::vec3(0, -1, 0);
-    } else if (std::abs(tMin - ((bounds[1].y - rayOrigin.y) / rayDirection.y)) < epsilon) {
-        normal = glm::vec3(0, 1, 0);
-    } else if (std::abs(tMin - ((bounds[0].z - rayOrigin.z) / rayDirection.z)) < epsilon) {
-        normal = glm::vec3(0, 0, -1);
-    } else if (std::abs(tMin - ((bounds[1].z - rayOrigin.z) / rayDirection.z)) < epsilon) {
-        normal = glm::vec3(0, 0, 1);
+    // Calcula las coordenadas de textura para cualquier cubo en el espacio
+    float tx, ty;
+
+// Proyecta las coordenadas del punto de intersección en cada cara del cubo sobre un plano 2D
+    glm::vec3 hitPoint = rayOrigin + tMin * rayDirection;
+    glm::vec3 localHitPoint = hitPoint - center; // Punto de intersección en coordenadas locales
+
+// Normaliza el punto de intersección local a un rango de [0, 1]
+    if (std::abs(normal.x) > 0) {
+        tx = (localHitPoint.z / edgeLength + 0.5f);
+        ty = (localHitPoint.y / edgeLength + 0.5f);
+    } else if (std::abs(normal.y) > 0) {
+        tx = (localHitPoint.x / edgeLength + 0.5f);
+        ty = (localHitPoint.z / edgeLength + 0.5f);
+    } else { // normal.z != 0
+        tx = (localHitPoint.x / edgeLength + 0.5f);
+        ty = (localHitPoint.y / edgeLength + 0.5f);
     }
 
+// Asegúrate de que las coordenadas UV estén en el rango [0, 1]
+    tx = glm::clamp(tx, 0.0f, 1.0f);
+    ty = glm::clamp(ty, 0.0f, 1.0f);
+
     glm::vec3 point = rayOrigin + tMin * rayDirection;
-    return Intersect{true, tMin, point, normal};
+    return Intersect{true, tMin, point, normal, tx, ty};
 }

@@ -8,6 +8,7 @@
 #include <glm/glm.hpp>
 #include <vector>
 #include <print.h>
+#include <SDL_image.h>
 #include "color.h"
 #include "intersect.h"
 #include "object.h"
@@ -15,12 +16,17 @@
 #include "light.h"
 #include "camera.h"
 #include "cube.h"
+#include "skybox.h"
+#include <SDL_image.h>
+
 
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 600;
 const float ASPECT_RATIO = static_cast<float>(SCREEN_WIDTH) / static_cast<float>(SCREEN_HEIGHT);
 const int MAX_RECURSION = 3;
 const float BIAS = 0.0001f;
+glm::vec3 lightOffset(0.0f, 2.0f, -1.0f);  // Ejemplo de desplazamiento
+Skybox skybox("../assets/sky.png");
 
 SDL_Renderer* renderer;
 std::vector<Object*> objects;
@@ -47,6 +53,25 @@ float castShadow(const glm::vec3& shadowOrigin, const glm::vec3& lightDir, Objec
     return 1.0f;
 }
 
+Color getColorFromSurface(SDL_Surface* surface, float u, float v) {
+    if (surface == nullptr) return Color(0, 0, 0); // Retornar color negro en caso de no haber textura
+
+    // Asegurar que u y v están en el rango [0, 1]
+    u = fmod(u, 1.0f);
+    v = fmod(v, 1.0f);
+    if (u < 0) u += 1.0f;
+    if (v < 0) v += 1.0f;
+
+    int x = static_cast<int>(u * surface->w);
+    int y = static_cast<int>(v * surface->h);
+
+    Uint32 pixel = static_cast<Uint32*>(surface->pixels)[y * surface->w + x];
+    SDL_Color color;
+    SDL_GetRGB(pixel, surface->format, &color.r, &color.g, &color.b);
+    return Color(color.r, color.g, color.b);
+}
+
+
 Color castRay(const glm::vec3& rayOrigin, const glm::vec3& rayDirection, const short recursion = 0) {
     float zBuffer = 99999;
     Object* hitObject = nullptr;
@@ -61,8 +86,8 @@ Color castRay(const glm::vec3& rayOrigin, const glm::vec3& rayDirection, const s
         }
     }
 
-    if (!intersect.isIntersecting || recursion == MAX_RECURSION) {
-        return Color(173, 216, 230);
+    if (!intersect.isIntersecting || recursion >= MAX_RECURSION) {
+        return skybox.getColor(rayDirection);  // Sky color
     }
 
 
@@ -93,15 +118,68 @@ Color castRay(const glm::vec3& rayOrigin, const glm::vec3& rayDirection, const s
         refractedColor = castRay(origin, refractDir, recursion + 1); 
     }
 
+    Color diffusecolor ;
+    if (mat.texture != nullptr) {
+        diffusecolor = getColorFromSurface(mat.texture, intersect.tx, intersect.ty);
+    } else {
+        diffusecolor = mat.diffuse;
+    }
 
-
-    Color diffuseLight = mat.diffuse * light.intensity * diffuseLightIntensity * mat.albedo * shadowIntensity;
+    Color diffuseLight = diffusecolor * light.intensity * diffuseLightIntensity * mat.albedo * shadowIntensity;
     Color specularLight = light.color * light.intensity * specLightIntensity * mat.specularAlbedo * shadowIntensity;
     Color color = (diffuseLight + specularLight) * (1.0f - mat.reflectivity - mat.transparency) + reflectedColor * mat.reflectivity + refractedColor * mat.transparency;
     return color;
-} 
+}
+
+SDL_Surface* loadTexture(const std::string& file) {
+    SDL_Surface* surface = IMG_Load(file.c_str());
+    if (surface == nullptr) {
+        std::cerr << "Unable to load image: " << IMG_GetError() << std::endl;
+    }
+    return surface;
+}
+
 
 void setUp() {
+
+    SDL_Surface* textureSurface = loadTexture("../assets/tree.png");
+    SDL_Surface* textureWood = loadTexture("../assets/pink.png");
+
+    SDL_Surface* pinkleaves = loadTexture("../assets/pink.png");
+
+    Material treeMaterial = {
+        Color(155, 0, 0),
+        0.9,
+        0.3,
+        10.0f,
+        0.0f,
+        0.0f,
+        0.0f,
+        textureSurface
+    };
+
+    Material pinkleavesMaterial = {
+        Color(155, 0, 0),
+        0.9,
+        0.3,
+        10.0f,
+        0.0f,
+        0.0f,
+        0.0f,
+        pinkleaves
+    };
+
+    Material woodMaterial = {
+        Color(155, 155, 155),
+        0.9,
+        0.3,
+        10.0f,
+        0.0f,
+        0.0f,
+        0.0f,
+        textureWood
+    };
+
     Material rubber = {
         Color(90, 10, 20, 90),   // diffuse
         0.9,
@@ -137,11 +215,18 @@ void setUp() {
         0.2f,
         1.0f,
     };
-    objects.push_back(new Cube(glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, rubber));
-    objects.push_back(new Cube(glm::vec3(-1.0f, 0.0f, -4.0f), 1.0f, ivory));
-    objects.push_back(new Cube(glm::vec3(1.0f, 0.0f, -4.0f), 1.0f, mirror));
-    objects.push_back(new Cube(glm::vec3(0.0f, 1.0f, -3.0f), 1.0f, glass));
-    objects.push_back(new Cube(glm::vec3(0.0f, -1.0f, -3.0f), 1.0f, glass));
+    objects.push_back(new Cube(glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, treeMaterial));
+    //objects.push_back(new Cube(glm::vec3(-1.0f, 0.0f, 0.0f), 1.0f, treeMaterial));
+    //objects.push_back(new Cube(glm::vec3(1.0f, 0.0f, 0.0f), 1.0f, treeMaterial));
+    //objects.push_back(new Cube(glm::vec3(0.0f, 1.0f, 0.0f), 1.0f, treeMaterial));
+
+    //objects.push_back(new Cube(glm::vec3(0.0f, -1.0f, 0.0f), 1.0f, woodMaterial));
+    //objects.push_back(new Cube(glm::vec3(0.0f, 0.0f, -1.0f), 1.0f, woodMaterial));
+
+
+    //objects.push_back(new Cube(glm::vec3(-1.0f, 0.0f, -4.0f), 1.0f, ivory));
+    //objects.push_back(new Cube(glm::vec3(0.0f, 1.0f, -3.0f), 1.0f, glass));
+    //objects.push_back(new Cube(glm::vec3(0.0f, -1.0f, -3.0f), 1.0f, glass));
 }
 
 void render() {
@@ -214,6 +299,8 @@ int main(int argc, char* argv[]) {
     int frameCount = 0;
     Uint32 startTime = SDL_GetTicks();
     Uint32 currentTime = startTime;
+
+
     
     setUp();
 
@@ -240,6 +327,7 @@ int main(int argc, char* argv[]) {
                         camera.rotate(1.0f, 0.0f);
                         break;
                  }
+                light.position = camera.position + lightOffset;
             }
 
 
@@ -249,6 +337,7 @@ int main(int argc, char* argv[]) {
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         SDL_RenderClear(renderer);
 
+        light.position = camera.position + lightOffset;
         render();
 
         // Present the renderer
