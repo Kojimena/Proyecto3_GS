@@ -143,15 +143,18 @@ SDL_Surface* loadTexture(const std::string& file) {
 void setUp() {
 
     SDL_Surface* textureSurface = loadTexture("../assets/face.png");
-
     SDL_Surface* skinFace = loadTexture("../assets/skin.png");
     SDL_Surface* chestFace = loadTexture("../assets/collar.png");
-
     SDL_Surface* dress = loadTexture("../assets/dress.png");
+    SDL_Surface * tail = loadTexture("../assets/tail.png");
+    SDL_Surface * hair = loadTexture("../assets/hair.png");
+
+    SDL_Surface * faceFish = loadTexture("../assets/facefish.png");
+    SDL_Surface * bodyFish = loadTexture("../assets/bodyfish.png");
 
     Material faceMaterial = {
         Color(0, 0, 0),
-        0.7,
+        1.2,
         0.3,
         10.0f,
         0.0f,
@@ -160,9 +163,31 @@ void setUp() {
         textureSurface
     };
 
+    Material facefishMaterial = {
+            Color(0, 0, 0),
+            1.2,
+            0.3,
+            10.0f,
+            0.0f,
+            0.0f,
+            0.0f,
+            faceFish
+    };
+
+    Material bodyfishMaterial = {
+            Color(0, 0, 0),
+            1.2,
+            0.3,
+            10.0f,
+            0.0f,
+            0.0f,
+            0.0f,
+            bodyFish
+    };
+
     Material bodyMaterial = {
             Color(0, 0, 0),
-            0.7,
+            1.9,
             0.3,
             10.0f,
             0.0f,
@@ -173,7 +198,7 @@ void setUp() {
 
     Material chestMaterial = {
             Color(0, 0, 0),
-            0.7,
+            1.9,
             0.3,
             10.0f,
             0.0f,
@@ -184,7 +209,7 @@ void setUp() {
 
     Material dressMaterial = {
         Color(155, 0, 0),
-        0.9,
+        1.9,
         0.3,
         10.0f,
         0.0f,
@@ -194,14 +219,26 @@ void setUp() {
 
     };
 
-    Material woodMaterial = {
-        Color(155, 155, 155),
-        0.9,
+    Material tailMaterial = {
+        Color(0, 0, 0),
+        1.9,
         0.3,
         10.0f,
         0.0f,
         0.0f,
-        0.0f
+        0.0f,
+        tail
+    };
+
+    Material hairMaterial = {
+            Color(0, 0, 0),
+            1.2,
+            0.3,
+            10.0f,
+            0.0f,
+            0.0f,
+            0.0f,
+            hair
     };
 
     Material rubber = {
@@ -231,6 +268,12 @@ void setUp() {
         1.0f,
     };
     objects.push_back(new Cube(glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, faceMaterial));
+    //hair
+    objects.push_back(new Sphere(glm::vec3(0.0f, 0.6f, 0.0f), 0.5f, glass));
+    objects.push_back(new Sphere(glm::vec3(0.6f, 0.6f, 0.0f), 0.5f, hairMaterial));
+    objects.push_back(new Sphere(glm::vec3(-0.6f, 0.6f, 0.0f), 0.5f, hairMaterial));
+    objects.push_back(new Cube(glm::vec3(1.0f, 0.0f, 0.0f), 1.0f, hairMaterial));
+    objects.push_back(new Cube(glm::vec3(-1.0f, 0.0f, 0.0f), 1.0f, hairMaterial));
     //shoulder
     objects.push_back(new Cube(glm::vec3(-1.0f, -1.0f, 0.0f), 1.0f, bodyMaterial));
     objects.push_back(new Cube(glm::vec3(1.0f, -1.0f, 0.0f), 1.0f, bodyMaterial));
@@ -238,7 +281,22 @@ void setUp() {
     //cuerpo
     objects.push_back(new Cube(glm::vec3(0.0f, -1.0f, 0.0f), 1.0f, chestMaterial));
     objects.push_back(new Cube(glm::vec3(0.0f, -2.0f, 0.0f), 1.0f, dressMaterial));
-    objects.push_back(new Cube(glm::vec3(0.0f, -3.0f, 0.0f), 1.0f, bodyMaterial));
+    objects.push_back(new Cube(glm::vec3(0.0f, -3.0f, 0.0f), 1.0f, tailMaterial));
+
+
+    //pez cara
+    objects.push_back(new Cube(glm::vec3(3.0f, -2.0f, 0.0f), 1.2f, facefishMaterial));
+
+    //burbujas
+    objects.push_back(new Sphere(glm::vec3(3.0f, -2.0f, 1.0f), 0.2f, mirror));
+    objects.push_back(new Sphere(glm::vec3(3.0f, -2.0f, 2.0f), 0.2f, mirror));
+
+    //pez cuerpo
+    objects.push_back(new Cube(glm::vec3(3.0f, -3.0f, 0.0f), 0.8f, bodyfishMaterial));
+    objects.push_back(new Cube(glm::vec3(3.0f, -1.5f, 0.0f), 0.7f, bodyfishMaterial));
+    objects.push_back(new Cube(glm::vec3(2.0f, -2.0f, 0.0f), 0.8f, bodyfishMaterial));
+    objects.push_back(new Cube(glm::vec3(4.0f, -2.0f, 0.0f), 0.8f, bodyfishMaterial));
+
 
 
 
