@@ -1,11 +1,6 @@
 #include <SDL2/SDL.h>
-#include <SDL_events.h>
-#include <SDL_render.h>
-#include <cstdlib>
-#include <glm/ext/quaternion_geometric.hpp>
 #include <glm/geometric.hpp>
 #include <string>
-#include <glm/glm.hpp>
 #include <vector>
 #include <print.h>
 #include <SDL_image.h>
@@ -17,10 +12,9 @@
 #include "camera.h"
 #include "cube.h"
 #include "skybox.h"
-#include <SDL_image.h>
 
 
-const int SCREEN_WIDTH = 800;
+const int SCREEN_WIDTH = 700;
 const int SCREEN_HEIGHT = 600;
 const float ASPECT_RATIO = static_cast<float>(SCREEN_WIDTH) / static_cast<float>(SCREEN_HEIGHT);
 const int MAX_RECURSION = 3;
@@ -30,8 +24,8 @@ Skybox skybox("../assets/ocean.png");
 
 SDL_Renderer* renderer;
 std::vector<Object*> objects;
-Light light(glm::vec3(-1.0, 0, 10), 1.5f, Color(255, 255, 255));
-Camera camera(glm::vec3(0.0, 0.0, 5.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), 10.0f);
+Light light(glm::vec3(-1.0, 0, 10), 1.0f, Color(255, 255, 255));
+Camera camera(glm::vec3(0.0, 0.0, 8.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), 10.0f);
 
 
 void point(glm::vec2 position, Color color) {
@@ -56,7 +50,6 @@ float castShadow(const glm::vec3& shadowOrigin, const glm::vec3& lightDir, Objec
 Color getColorFromSurface(SDL_Surface* surface, float u, float v) {
     if (surface == nullptr) return Color(0, 0, 0); // Retornar color negro en caso de no haber textura
 
-    // Asegurar que u y v están en el rango [0, 1]
     u = fmod(u, 1.0f);
     v = fmod(v, 1.0f);
     if (u < 0) u += 1.0f;
@@ -89,6 +82,7 @@ Color castRay(const glm::vec3& rayOrigin, const glm::vec3& rayDirection, const s
     if (!intersect.isIntersecting || recursion >= MAX_RECURSION) {
         return skybox.getColor(rayDirection);  // Sky color
     }
+
 
 
     glm::vec3 lightDir = glm::normalize(light.position - intersect.point);
@@ -152,9 +146,11 @@ void setUp() {
     SDL_Surface * faceFish = loadTexture("../assets/facefish.png");
     SDL_Surface * bodyFish = loadTexture("../assets/bodyfish.png");
 
+    SDL_Surface * trident = loadTexture("../assets/trident.png");
+
     Material faceMaterial = {
         Color(0, 0, 0),
-        1.2,
+        0.9,
         0.3,
         10.0f,
         0.0f,
@@ -165,10 +161,10 @@ void setUp() {
 
     Material facefishMaterial = {
             Color(0, 0, 0),
-            1.2,
+            1.0,
             0.3,
             10.0f,
-            0.0f,
+            0.2f,
             0.0f,
             0.0f,
             faceFish
@@ -176,7 +172,7 @@ void setUp() {
 
     Material bodyfishMaterial = {
             Color(0, 0, 0),
-            1.2,
+            0.9,
             0.3,
             10.0f,
             0.0f,
@@ -187,7 +183,7 @@ void setUp() {
 
     Material bodyMaterial = {
             Color(0, 0, 0),
-            1.9,
+            0.9,
             0.3,
             10.0f,
             0.0f,
@@ -198,7 +194,7 @@ void setUp() {
 
     Material chestMaterial = {
             Color(0, 0, 0),
-            1.9,
+            0.9,
             0.3,
             10.0f,
             0.0f,
@@ -209,10 +205,10 @@ void setUp() {
 
     Material dressMaterial = {
         Color(155, 0, 0),
-        1.9,
+        1.0,
         0.3,
         10.0f,
-        0.0f,
+        0.2f,
         0.0f,
         0.0f,
         dress
@@ -221,33 +217,34 @@ void setUp() {
 
     Material tailMaterial = {
         Color(0, 0, 0),
-        1.9,
+        1.0,
         0.3,
         10.0f,
+        0.2f,
         0.0f,
-        0.0f,
-        0.0f,
+        1.0f,
         tail
     };
 
     Material hairMaterial = {
             Color(0, 0, 0),
             1.2,
-            0.3,
+            0.9,
             10.0f,
-            0.0f,
-            0.0f,
-            0.0f,
+            0.3f,
+            0.4f,
+            10.0f,
             hair
     };
 
-    Material rubber = {
-        Color(90, 10, 20, 90),   // diffuse
+    Material greeneMaterial = {
+        Color(20, 255, 230, 10),   // diffuse
         0.9,
         0.1,
         10.0f,
+        0.7f,
         0.0f,
-        0.0f
+        10.0f,
     };
 
     Material mirror = {
@@ -260,28 +257,42 @@ void setUp() {
     };
 
     Material glass = {
-        Color(255, 255, 255),
+        Color(255, 0, 225),
         0.0f,
         10.0f,
-        1425.0f,
+        1525.0f,
         0.2f,
         1.0f,
+        1525.0f
     };
-    objects.push_back(new Cube(glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, faceMaterial));
+
+    Material tridentMaterial = {
+            Color(0, 0, 0),
+            1.3,
+            0.3,
+            5.0f,
+            0.4f,
+            0.0f,
+            0.0f,
+            trident
+    };
+
+
+    objects.push_back(new Cube(glm::vec3(0.0f, 0.0f, -1.0f), 1.0f, faceMaterial));
     //hair
-    objects.push_back(new Sphere(glm::vec3(0.0f, 0.6f, 0.0f), 0.5f, glass));
-    objects.push_back(new Sphere(glm::vec3(0.6f, 0.6f, 0.0f), 0.5f, hairMaterial));
-    objects.push_back(new Sphere(glm::vec3(-0.6f, 0.6f, 0.0f), 0.5f, hairMaterial));
-    objects.push_back(new Cube(glm::vec3(1.0f, 0.0f, 0.0f), 1.0f, hairMaterial));
-    objects.push_back(new Cube(glm::vec3(-1.0f, 0.0f, 0.0f), 1.0f, hairMaterial));
+    objects.push_back(new Sphere(glm::vec3(0.0f, 0.6f, -1.0f), 0.5f, hairMaterial));
+    objects.push_back(new Sphere(glm::vec3(0.6f, 0.6f, -1.0f), 0.5f, tridentMaterial));
+    objects.push_back(new Sphere(glm::vec3(-0.6f, 0.6f, -1.0f), 0.5f, tridentMaterial));
+    objects.push_back(new Sphere(glm::vec3(1.0f, 0.0f, -1.0f), 0.5f, tridentMaterial));
+    objects.push_back(new Sphere(glm::vec3(-1.0f, 0.0f, -1.0f), 0.5f, tridentMaterial));
     //shoulder
-    objects.push_back(new Cube(glm::vec3(-1.0f, -1.0f, 0.0f), 1.0f, bodyMaterial));
-    objects.push_back(new Cube(glm::vec3(1.0f, -1.0f, 0.0f), 1.0f, bodyMaterial));
+    objects.push_back(new Cube(glm::vec3(-0.5f, -1.0f, -1.0f), 0.8f, bodyMaterial));
+    objects.push_back(new Cube(glm::vec3(0.5f, -1.0f, -1.0f), 0.8f, bodyMaterial));
 
     //cuerpo
-    objects.push_back(new Cube(glm::vec3(0.0f, -1.0f, 0.0f), 1.0f, chestMaterial));
-    objects.push_back(new Cube(glm::vec3(0.0f, -2.0f, 0.0f), 1.0f, dressMaterial));
-    objects.push_back(new Cube(glm::vec3(0.0f, -3.0f, 0.0f), 1.0f, tailMaterial));
+    objects.push_back(new Cube(glm::vec3(0.0f, -1.0f, -1.0f), 1.0f, chestMaterial));
+    objects.push_back(new Cube(glm::vec3(0.0f, -2.0f, -1.0f), 1.0f, dressMaterial));
+    objects.push_back(new Cube(glm::vec3(0.0f, -3.0f, -1.0f), 1.0f, tailMaterial));
 
 
     //pez cara
@@ -290,37 +301,44 @@ void setUp() {
     //burbujas
     objects.push_back(new Sphere(glm::vec3(3.0f, -2.0f, 1.0f), 0.2f, mirror));
     objects.push_back(new Sphere(glm::vec3(3.0f, -2.0f, 2.0f), 0.2f, mirror));
+    objects.push_back(new Sphere(glm::vec3(3.0f, -1.5f, 1.5f), 0.1f, mirror));
 
     //pez cuerpo
-    objects.push_back(new Cube(glm::vec3(3.0f, -3.0f, 0.0f), 0.8f, bodyfishMaterial));
+    objects.push_back(new Cube(glm::vec3(3.0f, -1.0f, 0.0f), 0.2f, bodyfishMaterial));
     objects.push_back(new Cube(glm::vec3(3.0f, -1.5f, 0.0f), 0.7f, bodyfishMaterial));
-    objects.push_back(new Cube(glm::vec3(2.0f, -2.0f, 0.0f), 0.8f, bodyfishMaterial));
-    objects.push_back(new Cube(glm::vec3(4.0f, -2.0f, 0.0f), 0.8f, bodyfishMaterial));
+    objects.push_back(new Cube(glm::vec3(2.6f, -2.0f, 0.0f), 0.9f, bodyfishMaterial));
+    objects.push_back(new Cube(glm::vec3(3.4f, -2.0f, 0.0f), 0.9f, bodyfishMaterial));
 
+    //trident
+    objects.push_back(new Cube(glm::vec3(0.8f, -1.2f, -0.6f), 0.2f, greeneMaterial));
+    objects.push_back(new Cube(glm::vec3(0.8f, -1.2f, -0.4f), 0.2f, greeneMaterial));
+    objects.push_back(new Cube(glm::vec3(0.8f, -1.2f, -0.2f), 0.2f, greeneMaterial));
+    objects.push_back(new Cube(glm::vec3(0.8f, -1.2f, 0.0f), 0.2f, greeneMaterial));
+    objects.push_back(new Cube(glm::vec3(0.8f, -1.2f, 0.2f), 0.2f, greeneMaterial));
+    objects.push_back(new Cube(glm::vec3(0.8f, -1.2f, 0.4f), 0.2f, greeneMaterial));
+    objects.push_back(new Cube(glm::vec3(0.8f, -1.2f, 0.6f), 0.2f, greeneMaterial));
+    objects.push_back(new Cube(glm::vec3(0.8f, -1.2f, 0.8f), 0.2f, greeneMaterial));
+    objects.push_back(new Cube(glm::vec3(0.8f, -1.2f, 1.0f), 0.2f, greeneMaterial));
+    objects.push_back(new Cube(glm::vec3(0.8f, -1.2f, 1.2f), 0.2f, greeneMaterial));
 
+    objects.push_back(new Cube(glm::vec3(1.0f, -1.2f, 1.2f), 0.2f, greeneMaterial));
+    objects.push_back(new Cube(glm::vec3(0.6f, -1.2f, 1.2f), 0.2f, greeneMaterial));
 
+    objects.push_back(new Cube(glm::vec3(0.8f, -1.2f, 1.4f), 0.2f, tridentMaterial));
+    objects.push_back(new Cube(glm::vec3(0.8f, -1.2f, 1.6f), 0.2f, tridentMaterial));
+    objects.push_back(new Cube(glm::vec3(0.6f, -1.2f, 1.4f), 0.2f, tridentMaterial));
+    objects.push_back(new Cube(glm::vec3(1.0f, -1.2f, 1.4f), 0.2f, tridentMaterial));
+    objects.push_back(new Cube(glm::vec3(0.4f, -1.2f, 1.4f), 0.2f, tridentMaterial));
+    objects.push_back(new Cube(glm::vec3(1.2f, -1.2f, 1.4f), 0.2f, tridentMaterial));
+    objects.push_back(new Cube(glm::vec3(0.4f, -1.2f, 1.6f), 0.2f, tridentMaterial));
+    objects.push_back(new Cube(glm::vec3(1.2f, -1.2f, 1.6f), 0.2f, tridentMaterial));
 
-
-    //objects.push_back(new Cube(glm::vec3(0.0f, -1.0f, 0.0f), 1.0f, woodMaterial));
-    //objects.push_back(new Cube(glm::vec3(0.0f, 0.0f, -1.0f), 1.0f, woodMaterial));
-
-
-    //objects.push_back(new Cube(glm::vec3(-1.0f, 0.0f, -4.0f), 1.0f, ivory));
-    //objects.push_back(new Cube(glm::vec3(0.0f, 1.0f, -3.0f), 1.0f, glass));
-    //objects.push_back(new Cube(glm::vec3(0.0f, -1.0f, -3.0f), 1.0f, glass));
 }
 
 void render() {
     float fov = 3.1415/3;
     for (int y = 0; y < SCREEN_HEIGHT; y++) {
         for (int x = 0; x < SCREEN_WIDTH; x++) {
-            /*
-            float random_value = static_cast<float>(std::rand())/static_cast<float>(RAND_MAX);
-            if (random_value < 0.0) {
-                continue;
-            }
-            */
-
 
             float screenX = (2.0f * (x + 0.5f)) / SCREEN_WIDTH - 1.0f;
             float screenY = -(2.0f * (y + 0.5f)) / SCREEN_HEIGHT + 1.0f;
@@ -338,7 +356,6 @@ void render() {
             );
            
             Color pixelColor = castRay(camera.position, rayDirection);
-            /* Color pixelColor = castRay(glm::vec3(0,0,20), glm::normalize(glm::vec3(screenX, screenY, -1.0f))); */
 
             point(glm::vec2(x, y), pixelColor);
         }
@@ -353,7 +370,7 @@ int main(int argc, char* argv[]) {
     }
 
     // Create a window
-    SDL_Window* window = SDL_CreateWindow("Hello World - FPS: 0", 
+    SDL_Window* window = SDL_CreateWindow("Kosirena - FPS: 0",
                                           SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 
                                           SCREEN_WIDTH, SCREEN_HEIGHT, 
                                           SDL_WINDOW_SHOWN);
@@ -400,13 +417,12 @@ int main(int argc, char* argv[]) {
                         camera.move(1.0f);
                         break;
                     case SDLK_LEFT:
-                        print("left");
                         camera.rotate(-1.0f, 0.0f);
                         break;
                     case SDLK_RIGHT:
-                        print("right");
                         camera.rotate(1.0f, 0.0f);
                         break;
+
                  }
                 light.position = camera.position + lightOffset;
             }
@@ -418,7 +434,6 @@ int main(int argc, char* argv[]) {
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         SDL_RenderClear(renderer);
 
-        light.position = camera.position + lightOffset;
         render();
 
         // Present the renderer
@@ -429,7 +444,7 @@ int main(int argc, char* argv[]) {
         // Calculate and display FPS
         if (SDL_GetTicks() - currentTime >= 1000) {
             currentTime = SDL_GetTicks();
-            std::string title = "Hello World - FPS: " + std::to_string(frameCount);
+            std::string title = "Kosirena - FPS: " + std::to_string(frameCount);
             SDL_SetWindowTitle(window, title.c_str());
             frameCount = 0;
         }

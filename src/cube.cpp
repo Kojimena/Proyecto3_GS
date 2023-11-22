@@ -27,7 +27,6 @@ Intersect Cube::rayIntersect(const glm::vec3& rayOrigin, const glm::vec3& rayDir
     glm::vec3 delta = rayOrigin + tMin * rayDirection - center;
     glm::vec3 absDelta = glm::abs(delta);
 
-    // Determine which face was hit
     if (absDelta.x > absDelta.y && absDelta.x > absDelta.z) {
         normal = glm::vec3(delta.x > 0 ? 1 : -1, 0, 0);
     } else if (absDelta.y > absDelta.z) {
@@ -36,7 +35,6 @@ Intersect Cube::rayIntersect(const glm::vec3& rayOrigin, const glm::vec3& rayDir
         normal = glm::vec3(0, 0, delta.z > 0 ? 1 : -1);
     }
 
-    // Calculate UV coordinates for the hit face
     float tx, ty;
     if (absDelta.x > absDelta.y && absDelta.x > absDelta.z) {
         normal = glm::vec3(delta.x > 0 ? 1 : -1, 0, 0);
